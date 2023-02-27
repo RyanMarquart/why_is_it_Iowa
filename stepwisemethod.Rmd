@@ -1,0 +1,81 @@
+```{r}
+train <- read.csv("real_train.csv")
+
+
+```
+
+```{r}
+summary(train)
+lmBoth <- lm(log(SalePrice) ~ MSZoning + LotArea + Street + LotConfig + 
+    LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + 
+    OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + 
+    RoofMatl + Exterior1st + MasVnrType + ExterCond + Foundation + 
+    BsmtQual + BsmtCond + BsmtExposure + BsmtFinSF1 + BsmtFinSF2 + 
+    BsmtUnfSF + Heating + HeatingQC + CentralAir + X1stFlrSF + 
+    X2ndFlrSF + LowQualFinSF + BsmtFullBath + FullBath + HalfBath + 
+    KitchenAbvGr + KitchenQual + Functional + Fireplaces + GarageCars + 
+    GarageArea + GarageQual + GarageCond + WoodDeckSF + OpenPorchSF + 
+    EnclosedPorch + X3SsnPorch + ScreenPorch + PoolArea + PoolQC + 
+    SaleType + SaleCondition, train)
+
+lmForward <- lm(log(SalePrice) ~ Id + MSSubClass + MSZoning + LotArea + 
+    Street + Alley + LotShape + LandContour + LotConfig + LandSlope + 
+    Neighborhood + Condition1 + Condition2 + BldgType + HouseStyle + 
+    OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + 
+    RoofMatl + Exterior1st + Exterior2nd + MasVnrType + MasVnrArea + 
+    ExterQual + ExterCond + Foundation + BsmtQual + BsmtCond + 
+    BsmtExposure + BsmtFinType1 + BsmtFinSF1 + BsmtFinType2 + 
+    BsmtFinSF2 + BsmtUnfSF + TotalBsmtSF + Heating + HeatingQC + 
+    CentralAir + Electrical + X1stFlrSF + X2ndFlrSF + LowQualFinSF + 
+    GrLivArea + BsmtFullBath + BsmtHalfBath + FullBath + HalfBath + 
+    BedroomAbvGr + KitchenAbvGr + KitchenQual + TotRmsAbvGrd + 
+    Functional + Fireplaces + FireplaceQu + GarageType + GarageYrBlt + 
+    GarageFinish + GarageCars + GarageArea + GarageQual + GarageCond + 
+    PavedDrive + WoodDeckSF + OpenPorchSF + EnclosedPorch + X3SsnPorch + 
+    ScreenPorch + PoolArea + PoolQC + Fence + MiscFeature + MiscVal + 
+    MoSold + YrSold + SaleType + SaleCondition + TBsmtFullBath, train)
+
+lmBackward <- lm(log(SalePrice) ~ MSZoning + LotArea + Street + LotConfig + 
+    LandSlope + Neighborhood + Condition1 + Condition2 + BldgType + 
+    OverallQual + OverallCond + YearBuilt + YearRemodAdd + RoofStyle + 
+    RoofMatl + Exterior1st + MasVnrType + ExterCond + Foundation + 
+    BsmtQual + BsmtCond + BsmtExposure + BsmtFinSF1 + BsmtFinSF2 + 
+    BsmtUnfSF + Heating + HeatingQC + CentralAir + X1stFlrSF + 
+    X2ndFlrSF + LowQualFinSF + BsmtFullBath + FullBath + HalfBath + 
+    KitchenAbvGr + KitchenQual + Functional + Fireplaces + GarageCars + 
+    GarageArea + GarageQual + GarageCond + WoodDeckSF + OpenPorchSF + 
+    EnclosedPorch + X3SsnPorch + ScreenPorch + PoolArea + PoolQC + 
+    SaleType + SaleCondition, train)
+
+
+
+full_model <- lm(log(SalePrice)~.,train)
+
+
+
+broom::glance(lmBackward)
+ols_mallows_cp(lmForward,full_model)
+
+
+```
+
+```{r}
+library(MASS)
+library(broom)
+# Fit the full model 
+full.model <- lm(log(SalePrice) ~., data = train)
+# Stepwise regression model
+step.model <- stepAIC(full.model, direction = "backward", 
+                      trace = FALSE)
+summary(step.model)
+
+
+
+models <- regsubsets(log(SalePrice)~., data = train,
+                     method = "seqrep")
+summary(models)
+
+#broom::glance() plug in lmBackward,lmForward,lmBoth to see the rsquared, BIC and AIC
+
+# go in depth on forward, backward, and both, and see which one is the best set of variables to use.
+```
