@@ -9,6 +9,14 @@ library(corrr)
 library(ggcorrplot)
 library(FactoMineR)
 library(factoextra)
+library(randomForest)
+library(tidyverse)
+library(tidymodels)
+library(glmnet)
+library(caret)
+library(rpart.plot)
+library(vip)
+
 
 
 #load data
