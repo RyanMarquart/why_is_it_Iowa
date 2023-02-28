@@ -29,3 +29,40 @@ test <- test[-1] %>% mutate_if(is.character, as.factor)
 ```
 
 
+```{r}
+
+#This data does not have a normal distribution
+ggplot(data  = train, aes(sample = SalePrice)) + stat_qq() + stat_qq_line()
+
+
+
+#Log transforming the data makes it appear normally distributed
+ggplot(data  = train, aes(sample = log(SalePrice))) + stat_qq() + stat_qq_line()
+
+
+```
+
+```{r}
+library(MASS)
+library(broom)
+# Fit the full model 
+full.model <- lm(log(SalePrice) ~., data = train)
+# Stepwise regression model
+
+
+#Backward stepwise
+step.model <- stepAIC(full.model, direction = "forward", 
+                      trace = FALSE)
+#Properly naming model
+lmForward <- step.model
+
+step.model <- stepAIC(full.model, direction = "backward", 
+                      trace = FALSE)
+#Properly naming model
+lmBackward<- step.model
+
+step.model <- stepAIC(full.model, direction = "both", 
+                      trace = FALSE)
+#Properly naming model
+lmBoth <- step.model
+```
