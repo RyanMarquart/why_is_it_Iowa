@@ -1,3 +1,4 @@
+```{r}
 #libraries
 library(ggplot2)
 library(GGally)
@@ -16,14 +17,15 @@ library(glmnet)
 library(caret)
 library(rpart.plot)
 library(vip)
+```
 
-
+```{r}
 #load data
 train <- read_csv("real_train.csv")
 test <- read_csv("real_test.csv")
 
 train <- train[-1] %>% mutate_if(is.character,as.factor) 
 test <- test[-1] %>% mutate_if(is.character, as.factor)
-
+```
 
 
