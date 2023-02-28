@@ -1,0 +1,62 @@
+```{r}
+
+library(dplyr)
+
+train <- read.csv("train.csv")
+test <- read.csv("test.csv")
+# Replacing all the NA values with 'None'
+nonelist <- c("PoolQC", "MiscFeature", "Alley", "Fence", "FireplaceQu", "GarageType", "GarageFinish", "GarageQual", "GarageCond","BsmtQual", "BsmtCond", "BsmtExposure", "BsmtFinType1", "BsmtFinType2", "MasVnrType", "MSSubClass", )
+
+for (varName in nonelist){
+  train$varName <- replace_na(train$varName, "None")
+   test$varName <- replace_na(test$varName, "None")
+}
+#Replacing all the NA values with 'None'
+zerolist <- c("GarageYrBlt", "GarageArea", "GarageCars", "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF", "TotalBsmtSF", "BsmtFullBath" , "BsmtHalfBath" ,"MasVnrArea")
+
+for (varName in zerolist){
+  train$varName <- replace_na(train$varName, "0")
+   test$varName <- replace_na(test$varName, "0")
+}
+
+# Special cases: In Kaggle, it says that the NA data should be these values.
+train$MSZoning <- replace_na(train$MSZoning ,"RL")
+test$MSZoning <- replace_na(test$MSZoning , "RL")
+
+train$Functional <- replace_na(train$Functional ,"Typ")
+test$Functional <- replace_na(test$Functional , "Typ")
+
+# Special Cases: there are only a couple NA values. Replace these NA values with the most common value.
+train$Electrical <- replace_na(train$Electrical ,"SBrkr'")
+test$Electrical <- replace_na(test$Electrical , "SBrkr'")
+
+train$KitchenQual <- replace_na(train$KitchenQual ,"TA")
+test$KitchenQual <- replace_na(test$KitchenQual , "TA")
+
+train$Exterior1st <- replace_na(train$Exterior1st , "VinylSd")
+test$Exterior1st <- replace_na(test$Exterior1st , "VinylSd")
+
+train$Exterior2nd <- replace_na(train$Exterior2nd , "VinylSd")
+test$Exterior2nd <- replace_na(test$Exterior2nd , "VinylSd")
+
+train$SaleType <- replace_na(train$SaleType ,"WD")
+test$SaleType <- replace_na(test$SaleType , "WD")
+
+#Removing the NA values for neighborhood. Run this last, or all values will be removed.
+train <- na.omit(train)
+
+# Remove the Utilities Variable. Every single value except one is the same value. This variable will not help with predictive modeling.
+train2 <-  train[,-10]
+#Getting rid of the outliers in GrLivArea.
+train %>% filter(train$GrLivArea > 4500) -> removed
+
+
+
+#This data does not have a normal distribution
+ggplot(data  = train, aes(sample = SalePrice)) + stat_qq() + stat_qq_line()
+
+
+
+#Log transforming the data makes it appear normally distributed
+ggplot(data  = train, aes(sample = log(SalePrice))) + stat_qq() + stat_qq_line()
+```
