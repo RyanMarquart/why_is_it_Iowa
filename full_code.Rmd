@@ -29,6 +29,32 @@ test <- read_csv("real_test.csv")
 train <- train[-1] %>% mutate_if(is.character,as.factor) 
 test <- test[-1] %>% mutate_if(is.character, as.factor)
 ```
+
+# KRISTINE - DATA EXPLORATION BELOW
+
+```{r}
+#data exploration of numerical cols
+train_df_k <- data.frame(train)
+
+numerical_cols_train <- select_if(train_df_k, is.numeric)
+
+for (col in names(numerical_cols_train)) {
+  plot(numerical_cols_train[,col], train_df_k$SalePrice,xlab=col,ylab="SalePrice")
+}
+```
+
+```{r}
+#data exploration of categorical cols
+categorical_cols_train <- select_if(train_df_k, is.factor)
+
+for (col in names(categorical_cols_train)) {
+  plot(categorical_cols_train[,col], train_df_k$SalePrice,xlab=col,ylab="SalePrice")
+}
+```
+
+# END OF DATA EXPLORATION
+
+
 -------------------------------------------------------------------
 
 # JACK SECTION --> BELOW HERE
