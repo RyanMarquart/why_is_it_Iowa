@@ -8,6 +8,11 @@ test <- read.csv("test.csv")
 nonelist <- c("PoolQC", "MiscFeature", "Alley", "Fence", "FireplaceQu", "GarageType", "GarageFinish", "GarageQual", "GarageCond","BsmtQual", "BsmtCond", "BsmtExposure", "BsmtFinType1", "BsmtFinType2", "MasVnrType", "MSSubClass")
 
 
+   for (varName in nonelist){
+  train$varName <- replace_na(train$varName, "None")
+   test$varName <- replace_na(test$varName, "None")
+}
+
    train$PoolQC <- replace_na(train$PoolQC, "None")
    test$PoolQC <- replace_na(test$PoolQC, "None")
    
@@ -56,11 +61,7 @@ nonelist <- c("PoolQC", "MiscFeature", "Alley", "Fence", "FireplaceQu", "GarageT
    train$MasVnrType <- replace_na(train$MasVnrType, "None")
    test$MasVnrType <- replace_na(test$MasVnrType, "None")
    
-   
-   for (varName in nonelist){
-  train$varName <- replace_na(train$varName, "None")
-   test$varName <- replace_na(test$varName, "None")
-}
+  
 #Replacing all the NA values with 0
 zerolist <- c("GarageYrBlt", "GarageArea", "GarageCars", "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF", "TotalBsmtSF", "BsmtFullBath" , "BsmtHalfBath" ,"MasVnrArea")
 
@@ -100,6 +101,7 @@ test$Exterior2nd <- replace_na(test$Exterior2nd , "VinylSd")
 train$SaleType <- replace_na(train$SaleType ,"WD")
 test$SaleType <- replace_na(test$SaleType , "WD")
 
+#Getting rid of NA values in LotFrontage
 train <- train[ , colSums(is.na(train))==0]
 
 
@@ -107,9 +109,7 @@ train <- train[ , colSums(is.na(train))==0]
 train2 <-  train[,-10]
 #Getting rid of the outliers in GrLivArea.
 train %>% filter(train$GrLivArea < 4500) -> train
-
-which(is.na(train))
-
+#Checking to see if there are any NAs, and if so, what varialbe they are in
 which(colSums(is.na(train))>0)
 
   
