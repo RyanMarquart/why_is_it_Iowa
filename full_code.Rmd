@@ -27,8 +27,9 @@ test <- read_csv("real_test.csv")
 train <- train[-1] %>% mutate_if(is.character,as.factor) 
 test <- test[-1] %>% mutate_if(is.character, as.factor)
 ```
+-------------------------------------------------------------------
 
-
+# JACK SECTION --> BELOW HERE
 ```{r}
 
 #This data does not have a normal distribution
@@ -66,7 +67,7 @@ step.model <- stepAIC(full.model, direction = "both",
 #Properly naming model
 lmBoth <- step.model
 ```
-
+# JACK ENDS
 
 ------------------------------------------------------------------------------------------------------------------
 
