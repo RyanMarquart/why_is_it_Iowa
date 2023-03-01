@@ -141,6 +141,19 @@ fviz_contrib(res_famd, "var", axes = 1) +
 
 ## MLR using important variables found with FAMD
 
+```{r}
+#mlr with top 15 famd variables
+mlr_famd <- lm(log(SalePrice) ~ Neighborhood+OverallQual+YearBuilt+BsmtQual+
+               GarageFinish+ExterQual+KitchenQual+Foundation+GarageArea+ 
+               GarageType+YearRemodAdd+TotalBsmtSF+Exterior1st+Exterior2nd+
+               FullBath, data=train)
+summary(mlr_famd)
+
+#rmse
+mlr_rmse_famd <- sqrt(mean(train$SalePrice - fitted(mlr_famd))^2)
+mlr_rmse_famd
+```
+
 
 # KRISTINE ENDS
 
