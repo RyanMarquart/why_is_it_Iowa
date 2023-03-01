@@ -30,7 +30,6 @@ train <- train[-1] %>% mutate_if(is.character,as.factor)
 test <- test[-1] %>% mutate_if(is.character, as.factor)
 ```
 
-# KRISTINE - DATA EXPLORATION BELOW
 ## Data Exploration
 
 ```{r}
@@ -65,12 +64,7 @@ plot(X1stFlrSF,SalePrice, main="Scatterplot of SalePrice vs X1stFlrSF")
 
 ```
 
-# END OF DATA EXPLORATION
 
-
--------------------------------------------------------------------
-
-# JACK SECTION --> BELOW HERE
 ## Data Cleaning
 ```{r}
 
@@ -111,11 +105,7 @@ step.model <- stepAIC(full.model, direction = "both",
 #Properly naming model
 lmBoth <- step.model
 ```
-# JACK ENDS
 
-------------------------------------------------------------------------------------------------------------------
-
-# KRISTINE BELOW
 
 ## FAMD
 
@@ -155,13 +145,7 @@ mlr_rmse_famd
 ```
 
 
-# KRISTINE ENDS
-
-------------------------------------------------------------------------------------------------------------------
-
-# EVAN SECTION BELOW HERE --> PROBABLY NEEDS TO BE INTEGRATED BETTER, BUT THIS IS PROLLY OK FOR NOW
-
-
+## Random Forrest
 
 ```{r -- log transforming saleprice}
 train_log_sp <- real_train %>% mutate(SalePrice = log(SalePrice))
@@ -219,7 +203,8 @@ ggplot(imp_DF[1:20,], aes(x=reorder(Variables, MSE), y=MSE, fill=MSE)) +
   theme(legend.position="none")
 ```
 
-# Beginning of Ridge Regression
+## Ridge Regression
+
 ```{r - setting x and y}
 set.seed(478)
 x = model.matrix(SalePrice~., df1_train)[,-1]
@@ -341,6 +326,7 @@ ggplot(imp_DF[1:50,], aes(x=reorder(Variables, MSE), y=MSE, fill=MSE)) +
 imp_DF[1:25,] # top 25 most important variables
 ```
 
+## Decision Trees
 
 ```{r adjusting df1_train for decision trees}
 set.seed(478)
@@ -375,15 +361,9 @@ tree_fit %>%
   rpart.plot()
 ```
 
-## END OF EVAN'S CODE FOR NOW --> AGAIN PROLLY WILL BE FIXED LATER TONIGHT, BUT WHATEVER
 
-------------------------------------------------------------------------------------------------------------------
+## Lasso
 
-
-# RYAN SECTION --> BELOW HERE
-
-
-#Lasso model creation
 ```{r}
 set.seed(478)
 #Make y value sales price
@@ -422,7 +402,8 @@ prediction_lasso <- predict(best_model, s = best_lambda, newx = test_x)
 ```
 
 
-#Gradient Boosting
+## Gradient Boosting
+
 ```{r}
 #Make gradient boosting model
 temp_boost <- gbm(SalePrice ~ . ,data = train_real, distribution = "gaussian", n.trees = 10000, shrinkage = 0.01, interaction.depth = 4)
@@ -430,7 +411,6 @@ temp_boost <- gbm(SalePrice ~ . ,data = train_real, distribution = "gaussian", n
 #Shows model variables
 summary(temp_boost)
 ```
-
 
 ```{r}
 #Makes vectors for the number of trees being created
@@ -460,7 +440,8 @@ Grad_estimates <- data.frame(prediction_matrix[,"Grad_Estimates"])
 Lasso_estimates <- prediction_lasso
 ```
 
-#LASSO and Gradient model results
+## LASSO and Gradient model results
+
 ```{r}
 #LASSO RMSEs
 #Train_LASSO_RMSE <- sqrt(mean((train_real$SalePrice - Lasso_estimates)^2))
@@ -478,6 +459,3 @@ Test_Gradient_RMSE <- sqrt(mean((test_real$SalePrice - Grad_estimates$prediction
 Test_Gradient_RMSE
 ```
 
-## END OF RYAN'S CODE 
-
-------------------------------------------------------------------------------------------------------------------
