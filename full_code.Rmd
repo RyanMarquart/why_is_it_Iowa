@@ -31,6 +31,7 @@ test <- test[-1] %>% mutate_if(is.character, as.factor)
 ```
 
 # KRISTINE - DATA EXPLORATION BELOW
+## Data Exploration
 
 ```{r}
 #data exploration of numerical cols
@@ -52,12 +53,25 @@ for (col in names(categorical_cols_train)) {
 }
 ```
 
+```{r, message=FALSE}
+#graphs for paper: variables with strong relationship to SalePrice
+
+attach(train)
+par(mfrow=c(2,2))
+plot(GrLivArea,SalePrice, main="Scatterplot of SalePrice vs. GrLivArea")
+plot(OverallQual,SalePrice, main="Scatterplot of SalePrice vs OverallQual")
+plot(GarageCars,SalePrice, main="Scatterplot of SalePrice vs GarageCars")
+plot(X1stFlrSF,SalePrice, main="Scatterplot of SalePrice vs X1stFlrSF")
+
+```
+
 # END OF DATA EXPLORATION
 
 
 -------------------------------------------------------------------
 
 # JACK SECTION --> BELOW HERE
+## Data Cleaning
 ```{r}
 
 #This data does not have a normal distribution
@@ -70,6 +84,8 @@ ggplot(data  = train, aes(sample = log(SalePrice))) + stat_qq() + stat_qq_line()
 
 
 ```
+
+## Stepwise Selection
 
 ```{r}
 library(MASS)
