@@ -356,11 +356,12 @@ tree_fit %>%
 
 #Lasso model creation
 ```{r}
+set.seed(478)
 #Make y value sales price
 y <- train_real$SalePrice
 
 #Sets x to all other variables for predictors
-x <- data.matrix(train_real[,!names(train_real) %in% c("SalePrice")])
+x <- data.matrix(train_real[,!names(train_real) %in% c("SalePrice", "TBsmtFullBath")])
 
 #Perform k-fold cross-validation
 cv_model <- cv.glmnet(x, y, alpha = 1)
@@ -384,8 +385,8 @@ coef(best_model)
 
 ```{r}
 #Makes values to test the lasso model against
-test_x <- data.matrix(test_real[,!names(train_real) %in% c("SalePrice")])
-test_y <- test_real$SalePrice
+test_x <- data.matrix(test_real)
+#test_y <- test_real$SalePrice
 
 #Matrix of estimated values from lasso model
 prediction_lasso <- predict(best_model, s = best_lambda, newx = test_x)
@@ -416,7 +417,7 @@ summary(gradient_error)
 #Head and tails of the test error data frame to find where MSE is lowest
 head(gradient_error)
 tail(gradient_error)
-Gradient_MSE <- unname(test.error[100])
+Gradient_MSE <- unname(gradient_error[100])
 #MSE is lowest for last variable
 
 ```
@@ -433,7 +434,7 @@ Lasso_estimates <- prediction_lasso
 #LASSO and Gradient model results
 ```{r}
 #LASSO RMSEs
-Train_LASSO_RMSE <- sqrt(mean((train_real$SalePrice - Lasso_estimates)^2))
+#Train_LASSO_RMSE <- sqrt(mean((train_real$SalePrice - Lasso_estimates)^2))
 #Train_LASSO_RMSE
 
 Test_LASSO_RMSE <- sqrt(mean((test_real$SalePrice - Lasso_estimates)^2))
@@ -441,7 +442,7 @@ Test_LASSO_RMSE
 
 
 #Gradient RMSEs
-Train_Gradient_RMSE <- sqrt(mean((train_real$SalePrice - Grad_estimates$prediction_matrix....Grad_Estimates..)^2))
+#Train_Gradient_RMSE <- sqrt(mean((train_real$SalePrice - Grad_estimates$prediction_matrix....Grad_Estimates..)^2))
 #Train_Gradient_RMSE
 
 Test_Gradient_RMSE <- sqrt(mean((test_real$SalePrice - Grad_estimates$prediction_matrix....Grad_Estimates..)^2))
