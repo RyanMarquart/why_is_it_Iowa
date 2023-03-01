@@ -1,4 +1,4 @@
-```{r}
+```{r -- loading all libraries}
 #libraries
 library(ggplot2)
 library(GGally)
@@ -21,32 +21,29 @@ library(gbm)
 library(janitor)
 ```
 
-```{r}
+```{r -- loading data}
 #load data
-train <- read_csv("real_train.csv")
-test <- read_csv("real_test.csv")
-
+test <- read.csv("Desktop/real_test.csv")
+train <- read.csv("Desktop/real_train.csv")
 train <- train[-1] %>% mutate_if(is.character,as.factor) 
 test <- test[-1] %>% mutate_if(is.character, as.factor)
 ```
 
+
 ## Data Exploration
 
-```{r}
+```{r - data exploration chunk1}
 #data exploration of numerical cols
 train_df_k <- data.frame(train)
-
 numerical_cols_train <- select_if(train_df_k, is.numeric)
-
 for (col in names(numerical_cols_train)) {
   plot(numerical_cols_train[,col], train_df_k$SalePrice,xlab=col,ylab="SalePrice")
 }
 ```
 
-```{r}
+```{r - data exploration chunk2}
 #data exploration of categorical cols
 categorical_cols_train <- select_if(train_df_k, is.factor)
-
 for (col in names(categorical_cols_train)) {
   plot(categorical_cols_train[,col], train_df_k$SalePrice,xlab=col,ylab="SalePrice")
 }
@@ -66,40 +63,31 @@ plot(X1stFlrSF,SalePrice, main="Scatterplot of SalePrice vs X1stFlrSF")
 
 
 ## Data Cleaning
-```{r}
+```{r - qqplot of SalePrice/log(SalePrice)}
 
 #This data does not have a normal distribution
 ggplot(data  = train, aes(sample = SalePrice)) + stat_qq() + stat_qq_line()
 
 
-
 #Log transforming the data makes it appear normally distributed
 ggplot(data  = train, aes(sample = log(SalePrice))) + stat_qq() + stat_qq_line()
-
-
 ```
 
 ## Stepwise Selection
 
-```{r}
-library(MASS)
-library(broom)
+```{r - fullmodel, fwd/bwd stepwise models}
 # Fit the full model 
 full.model <- lm(log(SalePrice) ~., data = train)
 # Stepwise regression model
-
-
 #Backward stepwise
 step.model <- stepAIC(full.model, direction = "forward", 
                       trace = FALSE)
 #Properly naming model
 lmForward <- step.model
-
 step.model <- stepAIC(full.model, direction = "backward", 
                       trace = FALSE)
 #Properly naming model
 lmBackward<- step.model
-
 step.model <- stepAIC(full.model, direction = "both", 
                       trace = FALSE)
 #Properly naming model
@@ -107,23 +95,51 @@ lmBoth <- step.model
 ```
 
 
+```{r, warning=FALSE}
+set.seed(478)
+# Set up repeated k-fold cross-validation
+train.control <- trainControl(method = "cv", number = 10)
+# Train the model
+step.model <- train(SalePrice ~., data = train,
+                    method = "leapForward", 
+                    tuneGrid = data.frame(nvmax = 1:50),
+                    trControl = train.control
+                    )
+step.model$results
+
+train.control <- trainControl(method = "cv", number = 10)
+# Train the model
+step.model <- train(SalePrice ~., data = train,
+                    method = "leapBackward", 
+                    tuneGrid = data.frame(nvmax = 1:50),
+                    trControl = train.control
+                    )
+step.model$results
+# 38,221.20 -- Forwards
+# 41,765.94 -- Backwards
+```
+
+
 ## FAMD
 
-```{r}
+```{r -- setting for FAMD}
 #getting data ready for FAMD
 train_famd <- train[-c(1,2,79)]
 ```
-```{r}
+
+```{r -- FAMD on Vars}
 #FAMD on all variables (categorical and qualitative)
 FAMD(train_famd, ncp = 5, sup.var = NULL, ind.sup = NULL, graph = TRUE)
 
 res_famd <- FAMD(train_famd, graph = FALSE)
 eig_val <- get_eigenvalue(res_famd)
 fviz_screeplot(res_famd)
+
 var <- get_famd_var(res_famd)
 
 # Plot of variables
 fviz_famd_var(res_famd, labelsize = 3, repel = TRUE)
+
 #Importance of variables
 fviz_contrib(res_famd, "var", axes = 1) +
     theme(axis.text = element_text(size = 6))
@@ -145,20 +161,20 @@ mlr_rmse_famd
 ```
 
 
-## Random Forrest
+## Prepping for Ridge Regression
 
-```{r -- log transforming saleprice}
+```{r}
 train_log_sp <- real_train %>% mutate(SalePrice = log(SalePrice))
 ```
 
-```{r -- drop X and set training df}
+```{r}
 drop <- ("X")
 df1_train = train_log_sp[,!(names(train_log_sp) %in% drop)]
 ```
 
 
-```{r - sig vars in basic LM}
-lm1 <- lm(SalePrice ~ ., data=df1_train)
+```{r}
+lm1 <- lm(SalePrice ~ ., data=train_log_sp)
 significant <- summary(lm1)$coefficients[, "Pr(>|t|)"] < 0.05
 significant[significant == TRUE] # all variables that are significant < 0.05 in basic lm
 ```
@@ -183,7 +199,7 @@ df1_train <- df1_train %>% mutate_if(is.character, as.factor)
 df1_train$MoSold <- as.factor(df1_train$MoSold)
 ```
 
-```{r -- dropping sale price}
+```{r}
 drop <- ("SalePrice")
 df1_no_SP = df1_train[,!(names(df1_train) %in% drop)]
 ```
@@ -205,11 +221,19 @@ ggplot(imp_DF[1:20,], aes(x=reorder(Variables, MSE), y=MSE, fill=MSE)) +
 
 ## Ridge Regression
 
+```{r -- train/testing data}
+set.seed(478)
+train_index <- sample(1:nrow(df1_train), size = round(0.7*nrow(df1_train)), replace = FALSE)
+ridge_train <- df1_train[train_index,]
+ridge_test <- df1_train[-train_index,]
+```
+
+
 ```{r - setting x and y}
 set.seed(478)
-x = model.matrix(SalePrice~., df1_train)[,-1]
+x = model.matrix(SalePrice~., ridge_train)[,-1]
 
-y = df1_train %>%
+y = ridge_train %>%
   dplyr::select(SalePrice) %>%
   unlist() %>%
   as.numeric()
@@ -223,18 +247,32 @@ ridgeGrid <- expand.grid(alpha = 0, lambda = seq(0.001,0.1,by = 0.0005))
 ridge_mod <- train(x=x, y=y, method='glmnet', trControl= control, tuneGrid=ridgeGrid) 
 
 ridge_mod$bestTune
-min(ridge_mod$results$RMSE) # 0.1185774 - when using log(SalePrice)
-# 25,127.53 -- when not log(SalePrice)
+min(ridge_mod$results$RMSE) # 0.1280044 - when using log(SalePrice)
+# 27,336.83 -- when not log(SalePrice)
 ```
 
-```{r -- train/testing data}
+```{r}
 set.seed(478)
-train_index <- sample(1:nrow(df1_train), size = round(0.7*nrow(df1_train)), replace = FALSE)
-ridge_train <- df1_train[train_index,]
-ridge_test <- df1_train[-train_index,]
+x = model.matrix(SalePrice~., ridge_test)[,-1]
+
+y = ridge_test %>%
+  dplyr::select(SalePrice) %>%
+  unlist() %>%
+  as.numeric()
+set.seed(478)
+control <- trainControl(method = "cv", number = 10)
+ridgeGrid <- expand.grid(alpha = 0, lambda = seq(0.001,0.1,by = 0.0005))
+
+ridge_mod <- train(x=x, y=y, method='glmnet', trControl= control, tuneGrid=ridgeGrid) 
+
+ridge_mod$bestTune
+min(ridge_mod$results$RMSE) # 0.1193598 - when using log(SalePrice)
+# 25,462.32 -- when not log(SalePrice)
+
 ```
 
-```{r ridge regression 2, warning=FALSE}
+
+```{r, warning=FALSE}
 #Ridge Regression Model
 set.seed(478)
 lambda <- lambda <- 10^seq(-2, 10, length.out = 100)
@@ -284,12 +322,12 @@ wf = workflow() %>%
   add_model(ridge_spec) %>%
   add_recipe(prep_data)
 best_mod = ridge_tune %>% select_best("rmse")
-
+ 
 ridge_final_fit = finalize_workflow(wf, best_mod) %>%
   fit(data = ridge_train)
 ```
 
-```{r ridge results, warning=FALSE}
+```{r, warning=FALSE}
 ridge_train_pred = predict(ridge_final_fit, ridge_train)
 
 RMSE(ridge_train_pred[['.pred']], ridge_train$SalePrice) #18,850.29
@@ -299,7 +337,7 @@ RMSE(ridge_train_pred[['.pred']], ridge_test$SalePrice) # 106,511.6
 
 
 ## Random Forest/Decision Trees Below
-```{r summary stats df1_train}
+```{r}
 mean(df1_train$SalePrice)
 summary(df1_train$SalePrice)
 # Min    - 10.46
@@ -310,7 +348,7 @@ summary(df1_train$SalePrice)
 # Max    - 13.53
 ```
 
-```{r varImp for quick rf}
+```{r}
 set.seed(478)
 
 quick_RF <- randomForest(x=df1_no_SP, y=df1_train$SalePrice, ntree=500,importance=TRUE)
@@ -326,37 +364,59 @@ ggplot(imp_DF[1:50,], aes(x=reorder(Variables, MSE), y=MSE, fill=MSE)) +
 imp_DF[1:25,] # top 25 most important variables
 ```
 
-## Decision Trees
-
 ```{r adjusting df1_train for decision trees}
 set.seed(478)
 df1_factor <- df1_train %>% mutate(price_factor = case_when(
-  SalePrice <= 10.46 ~ 'Very Inexpensive',
-  SalePrice <= 11.77 ~ 'Inexpensive',
-  SalePrice <= 12.00 ~ 'Medium Expensive',
-  SalePrice <= 12.02 ~ 'Expensive',
-  SalePrice >= 12.27 ~ 'Very Expensive'))
+  SalePrice <= 11.77 ~ 'Very Inexpensive',
+  SalePrice <= 12.00 ~ 'Inexpensive',
+  SalePrice <= 12.15 ~ 'Medium Expensive',
+  SalePrice <= 12.20 ~ 'Expensive'))
 df1_factor$price_factor <- as.factor(df1_factor$price_factor)
-head(df1_factor)
+# dropping sale price
+drop <- ("SalePrice")
+df1_no_sp2 = df1_factor[,!(names(df1_factor) %in% drop)]
 ```
 
+```{r train/test split for trees}
+train_index <- sample(1:nrow(df1_no_sp2), size = round(0.7*nrow(df1_no_sp2)), replace = FALSE)
+tree_train <- df1_no_sp2[train_index,]
+tree_test <- df1_no_sp2[-train_index,]
+```
 
-```{r decision tree for saleprice}
+```{r decision tree for price_factor}
 # Example tree - Fit depends on other variables
 set.seed(478)
 tree_spec <- decision_tree() %>%
   set_engine("rpart") %>%
   set_mode("classification")
 tree_fit <- tree_spec %>%
-  fit(price_factor ~ ., 
-      data = df1_no_SP)
+  fit(price_factor ~ GrLivArea+Neighborhood+OverallQual+TotalBsmtSF+BsmtFinSF1+
+        X1stFlrSF+LotArea+GarageArea+X2ndFlrSF+GarageCars+OverallCond+BsmtFinType1+
+        FireplaceQu+TotRmsAbvGrd+HouseStyle+GarageType+ExterQual+YearBuilt+KitchenQual+
+        Exterior2nd+GarageYrBlt+BsmtUnfSF+OpenPorchSF+Fireplaces+MSZoning, 
+      data = df1_no_sp2)
 
 tree_fit 
 tree_fit %>%
-  augment(new_data = df1_no_SP) %>%
+  augment(new_data = df1_no_sp2) %>%
+  accuracy(truth = price_factor, estimate = .pred_class)
+
+tree_test_fit <- tree_spec %>%
+  fit(price_factor ~ GrLivArea+Neighborhood+OverallQual+TotalBsmtSF+BsmtFinSF1+
+        X1stFlrSF+LotArea+GarageArea+X2ndFlrSF+GarageCars+OverallCond+BsmtFinType1+
+        FireplaceQu+TotRmsAbvGrd+HouseStyle+GarageType+ExterQual+YearBuilt+KitchenQual+
+        Exterior2nd+GarageYrBlt+BsmtUnfSF+OpenPorchSF+Fireplaces+MSZoning, 
+      data = tree_train)
+
+tree_test_fit %>%
+  augment(new_data = tree_test) %>%
   accuracy(truth = price_factor, estimate = .pred_class)
 
 tree_fit %>%
+  extract_fit_engine() %>%
+  rpart.plot()
+
+tree_test_fit %>%
   extract_fit_engine() %>%
   rpart.plot()
 ```
