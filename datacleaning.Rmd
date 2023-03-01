@@ -5,20 +5,79 @@ library(dplyr)
 train <- read.csv("train.csv")
 test <- read.csv("test.csv")
 # Replacing all the NA values with 'None'
-nonelist <- c("PoolQC", "MiscFeature", "Alley", "Fence", "FireplaceQu", "GarageType", "GarageFinish", "GarageQual", "GarageCond","BsmtQual", "BsmtCond", "BsmtExposure", "BsmtFinType1", "BsmtFinType2", "MasVnrType", "MSSubClass", )
+nonelist <- c("PoolQC", "MiscFeature", "Alley", "Fence", "FireplaceQu", "GarageType", "GarageFinish", "GarageQual", "GarageCond","BsmtQual", "BsmtCond", "BsmtExposure", "BsmtFinType1", "BsmtFinType2", "MasVnrType", "MSSubClass")
 
-for (varName in nonelist){
+
+   train$PoolQC <- replace_na(train$PoolQC, "None")
+   test$PoolQC <- replace_na(test$PoolQC, "None")
+   
+   train$MiscFeature <- replace_na(train$MiscFeature, "None")
+   test$MiscFeature <- replace_na(test$MiscFeature, "None")
+   
+   train$Alley <- replace_na(train$Alley, "None")
+   test$Alley <- replace_na(test$Alley, "None")
+   
+   train$Fence <- replace_na(train$Fence, "None")
+   test$Fence <- replace_na(test$Fence, "None")
+   
+   train$FireplaceQu <- replace_na(train$FireplaceQu, "None")
+   test$FireplaceQu <- replace_na(test$FireplaceQu, "None")
+   
+   train$GarageType <- replace_na(train$GarageType, "None")
+   test$GarageType <- replace_na(test$GarageType, "None")
+   
+   train$GarageFinish <- replace_na(train$GarageFinish, "None")
+   test$GarageFinish <- replace_na(test$GarageFinish, "None")
+
+   train$GarageQual <- replace_na(train$GarageQual, "None")
+   test$GarageQual <- replace_na(test$GarageQual, "None")
+   
+   train$GarageCond <- replace_na(train$GarageCond, "None")
+   test$GarageCond <- replace_na(test$GarageCond, "None")
+   
+   train$BsmtQual <- replace_na(train$BsmtQual, "None")
+   test$BsmtQual <- replace_na(test$BsmtQual, "None")
+   
+   train$BsmtCond <- replace_na(train$BsmtCond, "None")
+   test$BsmtCond <- replace_na(test$BsmtCond, "None")
+   
+   train$BsmtExposure <- replace_na(train$BsmtExposure, "None")
+   test$BsmtExposure <- replace_na(test$BsmtExposure, "None")
+   
+   train$BsmtFinType1 <- replace_na(train$BsmtFinType1, "None")
+   test$BsmtFinType1 <- replace_na(test$BsmtFinType1, "None")
+   
+   train$BsmtFinType2 <- replace_na(train$BsmtFinType2, "None")
+   test$BsmtFinType2 <- replace_na(test$BsmtFinType2, "None")
+   
+   train$MSSubClass <- replace_na(train$MSSubClass, "None")
+   test$MSSubClass <- replace_na(test$MSSubClass, "None")
+   
+   train$MasVnrType <- replace_na(train$MasVnrType, "None")
+   test$MasVnrType <- replace_na(test$MasVnrType, "None")
+   
+   
+   for (varName in nonelist){
   train$varName <- replace_na(train$varName, "None")
    test$varName <- replace_na(test$varName, "None")
 }
-#Replacing all the NA values with 'None'
+#Replacing all the NA values with 0
 zerolist <- c("GarageYrBlt", "GarageArea", "GarageCars", "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF", "TotalBsmtSF", "BsmtFullBath" , "BsmtHalfBath" ,"MasVnrArea")
 
 for (varName in zerolist){
-  train$varName <- replace_na(train$varName, "0")
-   test$varName <- replace_na(test$varName, "0")
+  print(varName)
+  train$varName <- replace_na(train$varName, 0)
+   test$varName <- replace_na(test$varName, 0)
 }
 
+
+   train$MasVnrArea <- replace_na(train$MasVnrArea, 0)
+   test$MasVnrArea <- replace_na(test$MasVnrArea, 0)
+   
+   
+   train$GarageYrBlt <- replace_na(train$GarageYrBlt, 0)
+   test$GarageYrBlt <- replace_na(test$GarageYrBlt, 0)
+   
 # Special cases: In Kaggle, it says that the NA data should be these values.
 train$MSZoning <- replace_na(train$MSZoning ,"RL")
 test$MSZoning <- replace_na(test$MSZoning , "RL")
@@ -42,15 +101,19 @@ test$Exterior2nd <- replace_na(test$Exterior2nd , "VinylSd")
 train$SaleType <- replace_na(train$SaleType ,"WD")
 test$SaleType <- replace_na(test$SaleType , "WD")
 
-#Removing the NA values for neighborhood. Run this last, or all values will be removed.
-train <- na.omit(train)
+train <- train[ , colSums(is.na(train))==0]
+
 
 # Remove the Utilities Variable. Every single value except one is the same value. This variable will not help with predictive modeling.
 train2 <-  train[,-10]
 #Getting rid of the outliers in GrLivArea.
-train %>% filter(train$GrLivArea > 4500) -> removed
+train %>% filter(train$GrLivArea < 4500) -> train
 
+which(is.na(train))
 
+which(colSums(is.na(train))>0)
+
+  
 
 #This data does not have a normal distribution
 ggplot(data  = train, aes(sample = SalePrice)) + stat_qq() + stat_qq_line()
