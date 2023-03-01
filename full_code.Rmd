@@ -75,18 +75,18 @@ lmBoth <- step.model
 
 
 
-```{r}
+```{r -- log transforming saleprice}
 train_log_sp <- real_train %>% mutate(SalePrice = log(SalePrice))
 ```
 
-```{r}
+```{r -- drop X and set training df}
 drop <- ("X")
 df1_train = train_log_sp[,!(names(train_log_sp) %in% drop)]
 ```
 
 
-```{r}
-lm1 <- lm(SalePrice ~ ., data=train_log_sp)
+```{r - sig vars in basic LM}
+lm1 <- lm(SalePrice ~ ., data=df1_train)
 significant <- summary(lm1)$coefficients[, "Pr(>|t|)"] < 0.05
 significant[significant == TRUE] # all variables that are significant < 0.05 in basic lm
 ```
@@ -111,7 +111,7 @@ df1_train <- df1_train %>% mutate_if(is.character, as.factor)
 df1_train$MoSold <- as.factor(df1_train$MoSold)
 ```
 
-```{r}
+```{r -- dropping sale price}
 drop <- ("SalePrice")
 df1_no_SP = df1_train[,!(names(df1_train) %in% drop)]
 ```
@@ -161,7 +161,7 @@ ridge_train <- df1_train[train_index,]
 ridge_test <- df1_train[-train_index,]
 ```
 
-```{r, warning=FALSE}
+```{r ridge regression 2, warning=FALSE}
 #Ridge Regression Model
 set.seed(478)
 lambda <- lambda <- 10^seq(-2, 10, length.out = 100)
@@ -216,7 +216,7 @@ ridge_final_fit = finalize_workflow(wf, best_mod) %>%
   fit(data = ridge_train)
 ```
 
-```{r, warning=FALSE}
+```{r ridge results, warning=FALSE}
 ridge_train_pred = predict(ridge_final_fit, ridge_train)
 
 RMSE(ridge_train_pred[['.pred']], ridge_train$SalePrice) #18,850.29
@@ -226,7 +226,7 @@ RMSE(ridge_train_pred[['.pred']], ridge_test$SalePrice) # 106,511.6
 
 
 ## Random Forest/Decision Trees Below
-```{r}
+```{r summary stats df1_train}
 mean(df1_train$SalePrice)
 summary(df1_train$SalePrice)
 # Min    - 10.46
@@ -237,7 +237,7 @@ summary(df1_train$SalePrice)
 # Max    - 13.53
 ```
 
-```{r}
+```{r varImp for quick rf}
 set.seed(478)
 
 quick_RF <- randomForest(x=df1_no_SP, y=df1_train$SalePrice, ntree=500,importance=TRUE)
@@ -267,7 +267,7 @@ head(df1_factor)
 ```
 
 
-```{r decision tree for PPO}
+```{r decision tree for saleprice}
 # Example tree - Fit depends on other variables
 set.seed(478)
 tree_spec <- decision_tree() %>%
