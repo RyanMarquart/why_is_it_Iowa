@@ -22,13 +22,12 @@ library(janitor)
 ```
 
 ```{r -- loading data}
-#load data
-test <- read.csv("Desktop/real_test.csv")
-train <- read.csv("Desktop/real_train.csv")
+#load data -- from GitHub URL
+train <- read.csv("https://raw.githubusercontent.com/RyanMarquart/why_is_it_Iowa/main/real_train.csv")
+test <- read.csv("https://raw.githubusercontent.com/RyanMarquart/why_is_it_Iowa/main/real_test.csv")
 train <- train[-1] %>% mutate_if(is.character,as.factor) 
 test <- test[-1] %>% mutate_if(is.character, as.factor)
 ```
-
 
 ## Data Exploration
 
