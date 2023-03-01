@@ -163,16 +163,19 @@ mlr_rmse_famd
 ## Prepping for Ridge Regression
 
 ```{r}
+# log transform saleprice
 train_log_sp <- real_train %>% mutate(SalePrice = log(SalePrice))
 ```
 
 ```{r}
+# drop useless X var
 drop <- ("X")
 df1_train = train_log_sp[,!(names(train_log_sp) %in% drop)]
 ```
 
 
 ```{r}
+# basic lm seeing significant vars
 lm1 <- lm(SalePrice ~ ., data=train_log_sp)
 significant <- summary(lm1)$coefficients[, "Pr(>|t|)"] < 0.05
 significant[significant == TRUE] # all variables that are significant < 0.05 in basic lm
@@ -212,6 +215,7 @@ imp_RF <- importance(quick_RF)
 imp_DF <- data.frame(Variables = row.names(imp_RF), MSE = imp_RF[,1])
 imp_DF <- imp_DF[order(imp_DF$MSE, decreasing = TRUE),]
 
+# plot of variable importance below
 ggplot(imp_DF[1:20,], aes(x=reorder(Variables, MSE), y=MSE, fill=MSE)) + 
   geom_bar(stat = 'identity') + 
   labs(x = 'Variables', y= 'Variable Importance') + coord_flip() + 
@@ -229,6 +233,7 @@ ridge_test <- df1_train[-train_index,]
 
 
 ```{r - setting x and y}
+# un-used ridge regression
 set.seed(478)
 x = model.matrix(SalePrice~., ridge_train)[,-1]
 
@@ -239,6 +244,7 @@ y = ridge_train %>%
 ```
 
 ```{r ridge regression}
+# un-used ridge
 set.seed(478)
 control <- trainControl(method = "cv", number = 10)
 ridgeGrid <- expand.grid(alpha = 0, lambda = seq(0.001,0.1,by = 0.0005))
@@ -251,6 +257,7 @@ min(ridge_mod$results$RMSE) # 0.1280044 - when using log(SalePrice)
 ```
 
 ```{r}
+# un-used ridge
 set.seed(478)
 x = model.matrix(SalePrice~., ridge_test)[,-1]
 
@@ -270,9 +277,9 @@ min(ridge_mod$results$RMSE) # 0.1193598 - when using log(SalePrice)
 
 ```
 
-
+## Ridge Regression Model
 ```{r, warning=FALSE}
-#Ridge Regression Model
+#True Ridge Regression Model
 set.seed(478)
 lambda <- lambda <- 10^seq(-2, 10, length.out = 100)
 tune_df <- data.frame(lambda = lambda)
