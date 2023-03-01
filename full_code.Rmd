@@ -503,18 +503,12 @@ Lasso_estimates <- prediction_lasso
 ## LASSO and Gradient model results
 
 ```{r}
-#LASSO RMSEs
-#Train_LASSO_RMSE <- sqrt(mean((train_real$SalePrice - Lasso_estimates)^2))
-#Train_LASSO_RMSE
-
+#LASSO RMSE
 Test_LASSO_RMSE <- sqrt(mean((test_real$SalePrice - Lasso_estimates)^2))
 Test_LASSO_RMSE
 
 
-#Gradient RMSEs
-#Train_Gradient_RMSE <- sqrt(mean((train_real$SalePrice - Grad_estimates$prediction_matrix....Grad_Estimates..)^2))
-#Train_Gradient_RMSE
-
+#Gradient RMSE
 Test_Gradient_RMSE <- sqrt(mean((test_real$SalePrice - Grad_estimates$prediction_matrix....Grad_Estimates..)^2))
 Test_Gradient_RMSE
 ```
