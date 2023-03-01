@@ -17,6 +17,8 @@ library(glmnet)
 library(caret)
 library(rpart.plot)
 library(vip)
+library(gbm)
+library(janitor)
 ```
 
 ```{r}
@@ -288,5 +290,50 @@ tree_fit %>%
 ```
 
 ## END OF EVAN'S CODE FOR NOW --> AGAIN PROLLY WILL BE FIXED LATER TONIGHT, BUT WHATEVER
+
+------------------------------------------------------------------------------------------------------------------
+
+
+# RYAN SECTION --> BELOW HERE
+
+
+#Lasso model creation
+```{r}
+#Make y value sales price
+y <- train_real$SalePrice
+
+#Sets x to all other variables for predictors
+x <- data.matrix(train_real[,!names(train_real) %in% c("SalePrice")])
+
+#Perform k-fold cross-validation
+cv_model <- cv.glmnet(x, y, alpha = 1)
+
+#Find best lambda value 
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+#Make plot of test MSE by lambda value
+plot(cv_model) 
+
+```
+
+
+```{r}
+#Makes the best lasso model and the coefficients from it
+best_model <- glmnet(x, y, alpha = 1, lambda = best_lambda)
+coef(best_model)
+```
+
+
+```{r}
+#Makes values to test the lasso model against
+test_x <- data.matrix(test_real[,!names(train_real) %in% c("SalePrice")])
+test_y <- test_real$SalePrice
+
+#Matrix of estimated values from lasso model
+prediction_lasso <- predict(best_model, s = best_lambda, newx = test_x)
+```
+
+## END OF RYAN'S CODE 
 
 ------------------------------------------------------------------------------------------------------------------
