@@ -422,9 +422,15 @@ tree_test_fit %>%
 ```
 
 
-## Lasso
+## LASSO
 
 ```{r}
+test_real <- read_csv("real_test.csv")
+train_real <- read_csv("real_train.csv")
+
+train_real <- as.data.frame(unclass(train_real), stringsAsFactors = TRUE)
+test_real <- as.data.frame(unclass(train_real), stringsAsFactors = TRUE)
+
 set.seed(478)
 #Make y value sales price
 y <- train_real$SalePrice
