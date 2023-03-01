@@ -65,7 +65,6 @@ nonelist <- c("PoolQC", "MiscFeature", "Alley", "Fence", "FireplaceQu", "GarageT
 zerolist <- c("GarageYrBlt", "GarageArea", "GarageCars", "BsmtFinSF1", "BsmtFinSF2", "BsmtUnfSF", "TotalBsmtSF", "BsmtFullBath" , "BsmtHalfBath" ,"MasVnrArea")
 
 for (varName in zerolist){
-  print(varName)
   train$varName <- replace_na(train$varName, 0)
    test$varName <- replace_na(test$varName, 0)
 }
