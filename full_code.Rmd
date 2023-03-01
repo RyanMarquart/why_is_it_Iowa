@@ -424,8 +424,8 @@ tree_test_fit %>%
 ## LASSO
 
 ```{r}
-test_real <- read_csv("real_test.csv")
-train_real <- read_csv("real_train.csv")
+train_real <- read.csv("https://raw.githubusercontent.com/RyanMarquart/why_is_it_Iowa/main/real_train.csv")
+test_real <- read.csv("https://raw.githubusercontent.com/RyanMarquart/why_is_it_Iowa/main/real_test.csv")
 
 train_real <- as.data.frame(unclass(train_real), stringsAsFactors = TRUE)
 test_real <- as.data.frame(unclass(train_real), stringsAsFactors = TRUE)
