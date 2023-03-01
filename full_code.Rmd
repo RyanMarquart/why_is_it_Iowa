@@ -99,6 +99,37 @@ lmBoth <- step.model
 
 ------------------------------------------------------------------------------------------------------------------
 
+# KRISTINE BELOW
+
+## FAMD
+
+```{r}
+#getting data ready for FAMD
+train_famd <- train[-c(1,2,79)]
+```
+```{r}
+#FAMD on all variables (categorical and qualitative)
+FAMD(train_famd, ncp = 5, sup.var = NULL, ind.sup = NULL, graph = TRUE)
+
+res_famd <- FAMD(train_famd, graph = FALSE)
+eig_val <- get_eigenvalue(res_famd)
+fviz_screeplot(res_famd)
+var <- get_famd_var(res_famd)
+
+# Plot of variables
+fviz_famd_var(res_famd, labelsize = 3, repel = TRUE)
+#Importance of variables
+fviz_contrib(res_famd, "var", axes = 1) +
+    theme(axis.text = element_text(size = 6))
+```
+
+## MLR using important variables found with FAMD
+
+
+# KRISTINE ENDS
+
+------------------------------------------------------------------------------------------------------------------
+
 # EVAN SECTION BELOW HERE --> PROBABLY NEEDS TO BE INTEGRATED BETTER, BUT THIS IS PROLLY OK FOR NOW
 
 
