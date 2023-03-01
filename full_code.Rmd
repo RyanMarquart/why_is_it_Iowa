@@ -334,6 +334,63 @@ test_y <- test_real$SalePrice
 prediction_lasso <- predict(best_model, s = best_lambda, newx = test_x)
 ```
 
+
+#Gradient Boosting
+```{r}
+#Make gradient boosting model
+temp_boost <- gbm(SalePrice ~ . ,data = train_real, distribution = "gaussian", n.trees = 10000, shrinkage = 0.01, interaction.depth = 4)
+
+#Shows model variables
+summary(temp_boost)
+```
+
+
+```{r}
+#Makes vectors for the number of trees being created
+num_trees = seq(from=100 ,to=10000, by=100) 
+
+#Makes a prediction matrix for each tree
+prediction_matrix <- predict(temp_boost, test_real, n.trees = num_trees)
+
+#Calculates MSE
+gradient_error<-with(train_real,apply( (prediction_matrix-SalePrice)^2,2,mean))
+summary(gradient_error) 
+
+#Head and tails of the test error data frame to find where MSE is lowest
+head(gradient_error)
+tail(gradient_error)
+Gradient_MSE <- unname(test.error[100])
+#MSE is lowest for last variable
+
+```
+
+
+```{r}
+#Make data frames for the predicted values
+colnames(prediction_matrix)[100] <- "Grad_Estimates"
+Grad_estimates <- data.frame(prediction_matrix[,"Grad_Estimates"])
+
+Lasso_estimates <- prediction_lasso
+```
+
+#LASSO and Gradient model results
+```{r}
+#LASSO RMSEs
+Train_LASSO_RMSE <- sqrt(mean((train_real$SalePrice - Lasso_estimates)^2))
+#Train_LASSO_RMSE
+
+Test_LASSO_RMSE <- sqrt(mean((test_real$SalePrice - Lasso_estimates)^2))
+Test_LASSO_RMSE
+
+
+#Gradient RMSEs
+Train_Gradient_RMSE <- sqrt(mean((train_real$SalePrice - Grad_estimates$prediction_matrix....Grad_Estimates..)^2))
+#Train_Gradient_RMSE
+
+Test_Gradient_RMSE <- sqrt(mean((test_real$SalePrice - Grad_estimates$prediction_matrix....Grad_Estimates..)^2))
+Test_Gradient_RMSE
+```
+
 ## END OF RYAN'S CODE 
 
 ------------------------------------------------------------------------------------------------------------------
